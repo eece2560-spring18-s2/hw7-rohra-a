@@ -6,12 +6,10 @@
 #include <limits>
 #include <queue>
 #include <map>
-
 #include "member.h"
 #include "csv_reader.h"
 
 namespace algdb {
-
 Database::Database() {
 }
 
@@ -195,11 +193,52 @@ void Database::LoadData(const std::string &data_folder_path,
 
 
 void Database::BuildMemberGraph() {
-  // Fill in your code here
-}
-
+  int a =  groups.size();
+  MemberConnection *mc_ = new MemberConnection();
+  MemberConnection *mc = new MemberConnection();
+  for (int i=0; i<a; i++){
+    auto g = groups[i];
+    int x = g->members.size();
+    for (int z=0; z<x;z++){
+      auto m = g->members[z];
+      int b = g->members.size();
+      for (int y=z+1; y<b; y++){
+            mc->dst = g->members[y];
+            mc->group = g; 
+            m->connecting_members.insert({g->members[y]->member_id, *mc});
+            mc_->dst = m;
+            mc_->group = g;
+            g->members[y]->connecting_members.insert({m->member_id, *mc_});
+          }
+          
+      }
+    }
+      delete mc_;
+      delete mc;
+    }
 double Database::BestGroupsToJoin(Member *root) {
-  // Fill in your code here
-}
-
+	std::priority_queue <Member *, std::vector<Member *>,Compare > q;
+	int b = members.size();
+  for (int i=0; i<b; i++){
+    members[i]->key = std::numeric_limits<double>::infinity();
+    members[i]->parent = NULL;
+    q.push(members[i]); //add each member into the hash table
+  }
+  root->key = 0;
+  q.push(root);
+  double total_weight = 0;
+  while (!q.empty()){
+    auto u = q.top();
+    q.pop();
+    u->color = COLOR_BLACK;
+    for (auto it = u->connecting_members.begin(); it != u->connecting_members.end(); ++it){
+      if (it->second.dst->color != COLOR_BLACK && it->second.GetWeight() < it->second.dst->key){
+        it->second.dst->parent = u;
+        it->second.dst->key = it->second.GetWeight();
+        total_weight = total_weight + it->second.GetWeight();
+      }
+    }
+  }
+  return total_weight;
+ }
 }
