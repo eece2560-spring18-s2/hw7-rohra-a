@@ -34,6 +34,11 @@ class Database{
 
   double BestGroupsToJoin(Member *root);
 };
+struct Compare {
+    bool operator()(const Member* l, const Member* r)  {
+        return r->key < l->key;
+    }
+};
 
 }
 

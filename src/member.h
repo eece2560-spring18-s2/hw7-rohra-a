@@ -30,7 +30,23 @@ class MemberConnection {
 
 class Member {
   // Add extra private fields and private methods if necessary.
-
+Member* DLS(Member *m, int depth, uint64_t dst_member_id){
+  if (depth == 0 && m->member_id == dst_member_id){
+    // m->parent = NULL;
+    return m;
+  }
+  if (depth > 0){
+    for(auto it = m->connecting_members.begin(); it != m->connecting_members.end(); ++it){
+      it->second.dst->parent = m;
+        auto found = DLS(it->second.dst, depth-1, dst_member_id);  
+        if (found != NULL){
+          return found;
+        }
+  }
+}
+return NULL;
+}
+  
  public:
   uint64_t member_id;
   float lat;
@@ -45,6 +61,7 @@ class Member {
   void PathToMemberIDDFS(uint64_t dst_member_id);
   void PrintPath(Member *dst);
   void DumpConnections();
+  // Member * DLS(Member *m, int depth, uint64_t dst_member_id);
 
   // For graph algorithms
   int color = COLOR_WHITE;
